@@ -1,5 +1,6 @@
 package com.juliaborges.todosimple.models;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.Column;
@@ -7,6 +8,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -22,30 +24,34 @@ public class User {
    public interface CreateUser {}
    public interface UpdateUser {}
     public static final String TABLE_NAME = "user";
+
     //Atributos do Usuário 
+    
     @Id 
     @GeneratedValue(strategy = GenerationType.IDENTITY) //Estratégia -> AutoIncrement
     @Column(name = "id", unique = true) //Unique para nunca duplicar valor 
     private Long id;  
-    //-------------------------------------
+  
     @Column(name = "username", length = 100,nullable = false, unique = true)//Gera configurações do Banco de Dados
     @NotNull(groups = CreateUser.class)//Quando eu for criar um usuário -> não pode ser nulo 
     @NotEmpty(groups = CreateUser.class) //Nao pode ser vazio
     @Size(groups = CreateUser.class, min=2,max=100)
     private String username; 
-    //-----------------------------------
+   
     @JsonProperty(access = Access.WRITE_ONLY)
     @Column(name = "password", length = 60,nullable = false)
     @NotNull(groups = {CreateUser.class, UpdateUser.class})
     @NotEmpty(groups ={CreateUser.class, UpdateUser.class})
     @Size(groups = {CreateUser.class, UpdateUser.class},min=7,max=20)
     private String password; 
-    //-----------------------------------
-    //private List<Task> tasks = new ArrayList<Task>();
+   
+    @OneToMany(mappedBy = "user")
+    private List<Task> tasks = new ArrayList<Task>();
+
     //Métodos
 
     public User() {
-    }
+}
     
 
     public User(Long id, String username, String password) {
@@ -78,6 +84,15 @@ public class User {
     public void setPassword(String password) {
         this.password = password;
     }
+    
+
+    public List<Task> getTasks() {
+        return this.tasks;
+    }
+
+    public void setTasks(List<Task> tasks) {
+        this.tasks = tasks;
+    }
 
     @Override
     public boolean equals(Object obj){
@@ -97,5 +112,7 @@ public class User {
         else if (!this.id.equals(other.id))
         return false;
         return Objects.equals(this.id, other.id) && Objects.equals(this.username, other.username) && Objects.equals(this.password,other.password);
+
+    
     }
 }
